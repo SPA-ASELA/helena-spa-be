@@ -38,6 +38,52 @@ components:
           $ref: '#/components/schemas/Token'
         refresh:
           $ref: '#/components/schemas/Token'
+    
+    Contact:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        comment:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      example:
+        name: fake name
+        email: fake@example.com
+        phone: 783465456
+        comment: fake comment
+        timestamp: 2020-05-12T16:18:04.793Z
+      
+    Booking:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        service:
+          type: string
+        date:
+          type: string
+          format: date-time
+        time:
+          type: string
+          format: time
+        timestamp:
+          type: string
+          format: date-time
+      example:
+        name: fake name
 
     Error:
       type: object
