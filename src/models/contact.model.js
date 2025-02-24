@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 
 const contactSchema = mongoose.Schema(
     {
@@ -24,9 +24,10 @@ const contactSchema = mongoose.Schema(
             required: true,
             trim: true,
         },
-        isRead: {
-            type: Boolean,
-            default: false,
+        status: {
+            type: String,
+            enum: ['unread', 'read'],
+            default: 'unread',
         }
     },
     {
@@ -35,6 +36,7 @@ const contactSchema = mongoose.Schema(
 );
 
 contactSchema.plugin(toJSON);
+contactSchema.plugin(paginate);
 
 const Contact = mongoose.model('Contact', contactSchema);
 

@@ -1,6 +1,7 @@
 const { orderService } = require('../services');
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
+const pick = require('../utils/pick');
 
 const createOrder = catchAsync(async (req, res) => {
     const order = await orderService.createOrder(req.body);
@@ -8,7 +9,9 @@ const createOrder = catchAsync(async (req, res) => {
 });
 
 const getOrders = catchAsync(async (req, res) => {
-    const orders = await orderService.getOrders();
+    const filter = pick(req.query, ['status']);
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+    const orders = await orderService.getOrders(filter, options);
     res.send(orders);
 });
 
@@ -17,8 +20,14 @@ const getOrder = catchAsync(async (req, res) => {
     res.send(order);
 });
 
+const orderAction = catchAsync(async (req, res) => {
+    const order = await orderService.orderAction(req.body.id, req.body.status);
+    res.send(order);
+});
+
 module.exports = {
     createOrder,
     getOrders,
-    getOrder
+    getOrder,
+    orderAction
 }

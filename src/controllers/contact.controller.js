@@ -10,7 +10,7 @@ const submitContact = catchAsync(async (req, res) => {
 
 const getAllContacts = catchAsync(async (req, res) => {
     const filter = pick(req.query, ['status']);
-    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);    
     const contacts = await contactService.getAllContacts(filter, options);
     res.status(httpStatus.OK).send(contacts);
 });
@@ -20,8 +20,14 @@ const getContactById = catchAsync(async (req, res) => {
     res.status(httpStatus.OK).send(contact);
 });
 
+const changeContactStatus = catchAsync(async (req, res) => {
+    const contact = await contactService.changeContactStatus(req.body.id, req.body.status);
+    res.status(httpStatus.OK).send(contact);
+});
+
 module.exports = {
     submitContact,
     getAllContacts,
-    getContactById
+    getContactById,
+    changeContactStatus,
 }

@@ -7,7 +7,8 @@ const router = express.Router();
 router
     .route('/')
     .post(contactController.submitContact)
-    .get(auth('manageContact'), contactController.getAllContacts);
+    .get(auth('manageContact'), contactController.getAllContacts)
+    .patch(auth('manageContact'), contactController.changeContactStatus);
 router.get('/:contactId', auth('manageContact'), contactController.getContactById);
 
 module.exports = router
