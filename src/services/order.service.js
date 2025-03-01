@@ -3,21 +3,16 @@ const ApiError = require('../utils/ApiError');
 const httpStatus = require('http-status');
 
 const createOrder = async (items) => {
-    for (const item of items) {
-        const store = await Store.findById(item.id);
-        if (!store) {
-            throw new ApiError(httpStatus.NOT_FOUND, `Item ${item.name} not found or not available right now`);
-        }
-        if (store.quantity < item.quantity) {
-            throw new ApiError(httpStatus.NOT_FOUND, `Item ${item.name} not available right now`);
-        }
+    const store = await Store.findById(items.item);
+    if(!store) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Store not found');
     }
-    for (const item of items) {
-        const store = await Store.findById(item.id);
-        store.quantity -= item.quantity;
-        await store.save();
-        await Order.create(item)
-    }
+    if(store.quantity < items.quantity) {
+        throw new ApiError(httpStatus.BAD_REQUEST, `${store.title}'s quantity is not enough for accept this order.`);
+    }    
+    await store.save();
+    const order = await Order.create(items);
+    return order;
 };
 
 const getOrders = async (filter, options) => {

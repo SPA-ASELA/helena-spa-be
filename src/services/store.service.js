@@ -17,6 +17,9 @@ const addItem = async (images, data) => {
 
 const getItemsUser = async (filter, options) => {
     filter.status = 'active';
+    if(filter.category === 'All') {
+        delete filter.category;
+    };    
     const stores = await Store.paginate(filter, options);
     return stores;
 };
@@ -26,6 +29,11 @@ const getItemUser = async (id) => {
     if (!store) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Item not found');
     }
+    return store;
+};
+
+const getUserCart = async (ids) => {
+    const store = await Store.find({ _id: { $in: ids }, status: 'active' });
     return store;
 };
 
@@ -99,6 +107,7 @@ module.exports = {
     addItem,
     getItemsUser,
     getItemUser,
+    getUserCart,
     getItemsAdmin,
     getItemAdmin,
     changeItemStatus,

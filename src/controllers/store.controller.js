@@ -9,8 +9,11 @@ const addItem = catchAsync(async (req, res) => {
 });
 
 const getItemsUser = catchAsync(async (req, res) => {
-    const filter = pick(req.query, ['name', 'role']);
+    const filter = pick(req.query, ['category']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
+    if (req.query.searchKey) {
+        filter.title = { $regex: req.query.searchKey, $options: 'i' };
+    }
     const result = await storeService.getItemsUser(filter, options);
     res.status(httpStatus.OK).send(result);
 });
@@ -20,10 +23,15 @@ const getItemUser = catchAsync(async (req, res) => {
     res.status(httpStatus.OK).send(store);
 });
 
+const getUserCart = catchAsync(async (req, res) => {
+    const ids = JSON.parse(req.query.ids);
+    const store = await storeService.getUserCart(ids);
+    res.status(httpStatus.OK).send(store);
+});
+
 const getItemsAdmin = catchAsync(async (req, res) => {    
     const filter = pick(req.query, ['status', 'category']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
-    // Check if the 'similar title' parameter is passed in the query
     if (req.query.searchKey) {
         filter.title = { $regex: req.query.searchKey, $options: 'i' };
     }
@@ -50,6 +58,7 @@ module.exports = {
     addItem,
     getItemsUser,
     getItemUser,
+    getUserCart,
     getItemsAdmin,
     getItemAdmin,
     changeItemStatus,

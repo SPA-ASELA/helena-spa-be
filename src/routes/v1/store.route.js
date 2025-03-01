@@ -9,6 +9,7 @@ const imgUpload = setupMulter('uploads/store');
 router.post('/add-item', auth('manageStore'), imgUpload.fields([{ name: 'mainImg', maxCount: 1 }, { name: 'subImgs', maxCount: 5 }]),  storeService.addItem);
 router.get('/get-items-user', storeService.getItemsUser);
 router.get('/get-item-user/:id', storeService.getItemUser);
+router.get('/get-user-cart', storeService.getUserCart);
 router.get('/get-items-admin', auth('manageStore'), storeService.getItemsAdmin);
 router.get('/get-item-admin/:id', auth('manageStore'), storeService.getItemAdmin);
 router.patch('/change-item-status', auth('manageStore'), storeService.changeItemStatus);
