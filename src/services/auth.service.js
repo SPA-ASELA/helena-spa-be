@@ -14,7 +14,7 @@ const { tokenTypes } = require('../config/tokens');
 const loginUserWithEmailAndPassword = async (email, password) => {
   const user = await userService.getUserByEmail(email);
   if (!user || !(await user.isPasswordMatch(password))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect email or password');
   }
   return user;
 };
@@ -49,6 +49,23 @@ const refreshAuth = async (refreshToken) => {
   } catch (error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
   }
+};
+
+/**
+ * Change password
+ * @param {ObjectId} userId
+ * @param {string} currentPassword
+ * @param {string} newPassword
+ * @returns {Promise}
+ */
+const changePassword = async (userId, currentPassword, newPassword) => {
+  const user = await userService.getUserById(userId);
+  
+  if (!user || !(await user.isPasswordMatch(currentPassword))) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect old password');
+  }
+  user.password = newPassword;
+  await user.save();
 };
 
 /**
@@ -94,6 +111,7 @@ module.exports = {
   loginUserWithEmailAndPassword,
   logout,
   refreshAuth,
+  changePassword,
   resetPassword,
   verifyEmail,
 };
