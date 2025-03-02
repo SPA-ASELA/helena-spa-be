@@ -22,6 +22,9 @@ const createBooking = async (data) => {
  * @returns {Promise<QueryResult>}
  */
 const getAllBookings = async (filter, options) => {
+    if (filter.status === 'all') {
+        delete filter.status;
+    }
     const bookings = await Booking.paginate(filter, options);
     return bookings;
 };
@@ -39,8 +42,19 @@ const getBooking = async (id) => {
     return booking;
 };
 
+const changeBookingStatus = async (id, status) => {
+    const booking = await Booking.findById(id);
+    if (!booking) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Booking not found');
+    }
+    booking.status = status;
+    await booking.save();
+    return booking;
+};
+
 module.exports = {
     createBooking,
     getAllBookings,
     getBooking,
+    changeBookingStatus
 }

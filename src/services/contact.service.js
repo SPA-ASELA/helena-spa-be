@@ -22,6 +22,9 @@ const submitContact = async (data) => {
  * @returns {Promise<QueryResult>}
  */
 const getAllContacts = async (filter, options) => {
+    if (filter.status === 'all') {
+        delete filter.status;
+    }
     const contacts = await Contact.paginate(filter, options);
     return contacts;
 };
@@ -40,8 +43,19 @@ const getContact = async (id) => {
     return contact;
 };
 
+const changeContactStatus = async (id, status) => {
+    const contact = await Contact.findById(id);
+    if (!contact) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Contact not found');
+    }
+    contact.status = status;
+    await contact.save();
+    return contact;
+};
+
 module.exports = {
     submitContact,
     getAllContacts,
     getContact,
+    changeContactStatus,
 }

@@ -5,6 +5,8 @@ const docsRoute = require('./docs.route');
 const config = require('../../config/config');
 const contact = require('./contact.route');
 const bookings = require('./booking.route');
+const store = require('./store.route');
+const orders = require('./orders.route');
 
 const router = express.Router();
 
@@ -24,7 +26,15 @@ const defaultRoutes = [
   {
     path: '/bookings',
     route: bookings,
-  }
+  },
+  {
+    path: '/store',
+    route: store,
+  },
+  {
+    path: '/orders',
+    route: orders,
+  },
 ];
 
 const devRoutes = [

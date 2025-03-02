@@ -39,14 +39,19 @@ const paginate = (schema) => {
     const countPromise = this.countDocuments(filter).exec();
     let docsPromise = this.find(filter).sort(sort).skip(skip).limit(limit);
 
+    if (options.select) {
+      docsPromise = docsPromise.select(options.select);
+    }
+
     if (options.populate) {
-      options.populate.split(',').forEach((populateOption) => {
-        docsPromise = docsPromise.populate(
-          populateOption
-            .split('.')
-            .reverse()
-            .reduce((a, b) => ({ path: b, populate: a }))
-        );
+      const populateOptions = Array.isArray(options.populate) ? options.populate : [options.populate];
+
+      populateOptions.forEach((populateOption) => {
+        if (typeof populateOption === 'string') {
+          docsPromise = docsPromise.populate(populateOption);
+        } else {
+          docsPromise = docsPromise.populate(populateOption);
+        }
       });
     }
 
@@ -55,14 +60,13 @@ const paginate = (schema) => {
     return Promise.all([countPromise, docsPromise]).then((values) => {
       const [totalResults, results] = values;
       const totalPages = Math.ceil(totalResults / limit);
-      const result = {
+      return {
         results,
         page,
         limit,
         totalPages,
         totalResults,
       };
-      return Promise.resolve(result);
     });
   };
 };

@@ -32,9 +32,13 @@ const orderSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
-    address: {
+    addressLine1: {
       type: String,
       required: true,
+      trim: true,
+    },
+    addressLine2: {
+      type: String,
       trim: true,
     },
     city: {
@@ -42,6 +46,11 @@ const orderSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
+    status: {
+      type: String,
+      enum: ['pending', 'accepted', 'rejected'],
+      default: 'pending',
+    }
   },
   {
     timestamps: true,

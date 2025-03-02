@@ -18,12 +18,12 @@ const storeSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
-    subCategory: {
+    mainImage: {
       type: String,
       required: true,
       trim: true,
     },
-    images: {
+    subImages: {
       type: [String],
       default: [],
       required: true,
@@ -40,8 +40,8 @@ const storeSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'inactive'],
-      default: 'pending',
+      enum: ['active', 'inactive', 'deleted'],
+      default: 'active',
     },
   },
   {

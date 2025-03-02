@@ -1,7 +1,7 @@
 const { bookingService } = require('../services');
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { pick } = require('../utils/pick');
+const pick = require('../utils/pick');
 
 const createBooking = catchAsync(async (req, res) => {
     const booking = await bookingService.createBooking(req.body);
@@ -20,8 +20,14 @@ const getBooking = catchAsync(async (req, res) => {
     res.status(httpStatus.OK).send(booking);
 });
 
+const changeBookingStatus = catchAsync(async (req, res) => {
+    const booking = await bookingService.changeBookingStatus(req.body.id, req.body.status);
+    res.status(httpStatus.OK).send(booking);
+});
+
 module.exports = {
     createBooking,
     getAllBookings,
-    getBooking
+    getBooking,
+    changeBookingStatus
 }

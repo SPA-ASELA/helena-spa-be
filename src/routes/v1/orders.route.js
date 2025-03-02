@@ -7,7 +7,8 @@ const router = express.Router();
 router
     .route('/')
     .post(orderService.createOrder)
-    .get(orderService.getOrders);
+    .get(auth('manageOrders'), orderService.getOrders)
+    .patch(auth('manageOrders'), orderService.orderAction);
 router.get('/:id', orderService.getOrder);
 
 module.exports = router
