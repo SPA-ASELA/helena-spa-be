@@ -40,11 +40,12 @@ const pick = require('../utils/pick');
 // Import email sender
 const { sendBookingNotification } = require('../utils/emailService');
 
+
 const createBooking = catchAsync(async (req, res) => {
     const booking = await bookingService.createBooking(req.body);
 
-    // Send email notification (no need to wait for completion)
-    sendBookingNotification().catch(err => console.error("Email send error:", err));
+    // Send email notification (Non-blocking)
+    sendBookingNotification();
 
     res.status(httpStatus.CREATED).send(booking);
 });

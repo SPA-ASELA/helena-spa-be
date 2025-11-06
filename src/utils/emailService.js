@@ -1,29 +1,19 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require('resend');
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function sendBookingNotification() {
-    // Configure Gmail transporter
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: "aselak30@gmail.com", // your Gmail
-            pass: "arsx vulz ibjo dlba", // replace below with Gmail App Password
-        },
-    });
-
-    // Define email options
-    const mailOptions = {
-        from: "aselak30@gmail.com",
-        to: "aselak30@gmail.com",
-        subject: "New Booking Received",
-        text: "A new booking has been made on your Helena Spa website.",
-    };
-
-    // Send email
     try {
-        await transporter.sendMail(mailOptions);
-        console.log("Booking notification email sent successfully");
+        await resend.emails.send({
+            from: 'Helena Spa <noreply@helenaspa.lk>',
+            to: 'aselak30@gmail.com',
+            subject: 'New Booking Received',
+            text: 'A new booking has been created on your Helena Spa website.'
+        });
+
+        console.log("✅ Resend email sent");
     } catch (error) {
-        console.error("Error sending booking email:", error);
+        console.error("❌ Resend email error:", error);
     }
 }
 
