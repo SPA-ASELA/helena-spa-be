@@ -38,17 +38,29 @@ const catchAsync = require('../utils/catchAsync');
 const pick = require('../utils/pick');
 
 // Import email sender
-const { sendBookingNotification } = require('../utils/emailService');
+// const { sendBookingNotification } = require('../utils/emailService');
 
+
+// const createBooking = catchAsync(async (req, res) => {
+//     const booking = await bookingService.createBooking(req.body);
+
+//     // Send email notification (Non-blocking)
+//     sendBookingNotification();
+
+//     res.status(httpStatus.CREATED).send(booking);
+// });
+
+
+const { sendWhatsAppNotification } = require("../utils/whatsapp");
 
 const createBooking = catchAsync(async (req, res) => {
     const booking = await bookingService.createBooking(req.body);
 
-    // Send email notification (Non-blocking)
-    sendBookingNotification();
+    sendWhatsAppNotification(req.body);
 
     res.status(httpStatus.CREATED).send(booking);
 });
+
 
 const getAllBookings = catchAsync(async (req, res) => {
     const filter = pick(req.query, ['status']);
