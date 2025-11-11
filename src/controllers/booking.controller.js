@@ -51,18 +51,20 @@ const pick = require('../utils/pick');
 // });
 
 
-const { notifyBooking } = require("../utils/notifyWhatsApp");
+
+const { sendWhatsAppNotification } = require("../utils/notifyWhatsApp");
 const { sendEmailNotification } = require("../utils/emailNotification");
 
 const createBooking = catchAsync(async (req, res) => {
     const booking = await bookingService.createBooking(req.body);
 
-    // Send both notifications
-    notifyBooking(req.body);
-    sendEmailNotification(req.body);
+    // These must not block the response
+    sendWhatsAppNotification(booking);
+    sendEmailNotification(booking);
 
     res.status(httpStatus.CREATED).send(booking);
 });
+
 
 
 
