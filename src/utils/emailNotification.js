@@ -8,23 +8,26 @@ async function sendEmailNotification(booking) {
     );
 
     const emailData = {
-        sender: { name: "Helena Spa", email: "notifications@brevo.com" },
+        sender: {
+            name: "Helena Spa",
+            email: "aselak30@gmail.com"        // ✅ <-- YOUR EMAIL
+        },
         to: [{ email: process.env.ADMIN_EMAIL }],
         subject: "✅ New Booking Received",
         textContent: `
 New Booking Details:
-Name: ${booking?.name || "N/A"}
-Phone: ${booking?.phone || "N/A"}
-Service: ${booking?.service || "N/A"}
-Date: ${booking?.date || "N/A"}
-    `
+Name: ${booking?.name}
+Phone: ${booking?.phone}
+Service: ${booking?.service}
+Date: ${booking?.date}
+    `,
     };
 
     try {
         await apiInstance.sendTransacEmail(emailData);
         console.log("✅ Email notification sent!");
     } catch (error) {
-        console.error("❌ Email Error:", error);
+        console.error("❌ Brevo email error:", error.response?.data || error.message);
     }
 }
 
