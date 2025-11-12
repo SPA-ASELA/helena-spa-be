@@ -1,6 +1,7 @@
 const { Booking } = require('../models');
 const ApiError = require('../utils/ApiError');
 const httpStatus = require('http-status');
+const { sendEmailNotification } = require('../utils/emailNotification');
 
 /**
  * Create a booking
@@ -9,6 +10,12 @@ const httpStatus = require('http-status');
  */
 const createBooking = async (data) => {
     const booking = await Booking.create(data);
+
+    // Send email notification via Brevo (non-blocking)
+    sendEmailNotification(booking).catch((error) => {
+        console.error('Failed to send email notification:', error);
+    });
+
     return booking;
 };
 
