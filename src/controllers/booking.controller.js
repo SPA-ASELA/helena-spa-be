@@ -53,14 +53,15 @@ const pick = require('../utils/pick');
 
 
 const { sendWhatsAppNotification } = require("../utils/notifyWhatsApp");
-const { sendEmailNotification } = require("../utils/emailNotification");
 
 const createBooking = catchAsync(async (req, res) => {
     const booking = await bookingService.createBooking(req.body);
 
-    // These must not block the response
-    sendWhatsAppNotification(booking);
-    sendEmailNotification(booking);
+    // Send WhatsApp notification (non-blocking)
+    // Email notification is handled in the booking service
+    sendWhatsAppNotification(booking).catch((error) => {
+        console.error('Failed to send WhatsApp notification:', error);
+    });
 
     res.status(httpStatus.CREATED).send(booking);
 });
