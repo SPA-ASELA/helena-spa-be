@@ -24,7 +24,7 @@ async function sendEmailNotification(booking) {
 
     try {
         // Format date for display
-        const formattedDate = bookingData.date 
+        const formattedDate = bookingData.date
             ? new Date(bookingData.date).toLocaleString('en-US', {
                 year: 'numeric',
                 month: 'long',
