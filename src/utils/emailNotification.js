@@ -23,13 +23,6 @@ async function sendEmailNotification(booking) {
     console.log("📧 Attempting to send email notification for booking:", bookingData);
 
     try {
-        // Initialize the API with the API key
-        const defaultClient = SibApiV3Sdk.ApiClient.instance;
-        const apiKey = defaultClient.authentications['api-key'];
-        apiKey.apiKey = process.env.BREVO_API_KEY;
-
-        const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-
         // Format date for display
         const formattedDate = bookingData.date 
             ? new Date(bookingData.date).toLocaleString('en-US', {
@@ -41,14 +34,15 @@ async function sendEmailNotification(booking) {
             })
             : bookingData.date || 'Not specified';
 
-        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-        sendSmtpEmail.sender = {
-            name: "Helena Spa",
-            email: "aselak30@gmail.com"
-        };
-        sendSmtpEmail.to = [{ email: process.env.ADMIN_EMAIL }];
-        sendSmtpEmail.subject = "✅ New Booking Received";
-        sendSmtpEmail.textContent = `
+        // Create email data object (plain object format)
+        const emailData = {
+            sender: {
+                name: "Helena Spa",
+                email: "aselak30@gmail.com"
+            },
+            to: [{ email: process.env.ADMIN_EMAIL }],
+            subject: "✅ New Booking Received",
+            textContent: `
 New Booking Details:
 Name: ${bookingData.name || 'Not provided'}
 Email: ${bookingData.email || 'Not provided'}
@@ -57,9 +51,23 @@ Service: ${bookingData.service || 'Not provided'}
 Date: ${formattedDate}
 Time: ${bookingData.time || 'Not provided'}
 Status: ${bookingData.status || 'pending'}
-        `.trim();
+            `.trim()
+        };
 
-        const response = await apiInstance.sendTransacEmail(sendSmtpEmail);
+        // Create API instance
+        const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+        
+        // Set API key - use the most common method for @getbrevo/brevo
+        // Try setApiKey with string identifier first (most compatible)
+        if (typeof apiInstance.setApiKey === 'function') {
+            apiInstance.setApiKey('api-key', process.env.BREVO_API_KEY);
+        } else {
+            // If setApiKey doesn't exist, log available methods for debugging
+            console.error("❌ setApiKey method not found on apiInstance. Available methods:", Object.getOwnPropertyNames(Object.getPrototypeOf(apiInstance)));
+            throw new Error('setApiKey method is not available on TransactionalEmailsApi instance');
+        }
+
+        const response = await apiInstance.sendTransacEmail(emailData);
         console.log("✅ Email notification sent successfully!", {
             messageId: response.messageId,
             response: response
