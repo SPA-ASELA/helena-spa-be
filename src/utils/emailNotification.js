@@ -1,4 +1,4 @@
-const SibApiV3Sdk = require("@getbrevo/brevo");
+const https = require('https');
 
 async function sendEmailNotification(booking) {
     // Validate environment variables
@@ -34,7 +34,7 @@ async function sendEmailNotification(booking) {
             })
             : bookingData.date || 'Not specified';
 
-        // Create email data object (plain object format)
+        // Create email data
         const emailData = {
             sender: {
                 name: "Helena Spa",
@@ -54,20 +54,8 @@ Status: ${bookingData.status || 'pending'}
             `.trim()
         };
 
-        // Create API instance
-        const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-        
-        // Set API key - use the most common method for @getbrevo/brevo
-        // Try setApiKey with string identifier first (most compatible)
-        if (typeof apiInstance.setApiKey === 'function') {
-            apiInstance.setApiKey('api-key', process.env.BREVO_API_KEY);
-        } else {
-            // If setApiKey doesn't exist, log available methods for debugging
-            console.error("❌ setApiKey method not found on apiInstance. Available methods:", Object.getOwnPropertyNames(Object.getPrototypeOf(apiInstance)));
-            throw new Error('setApiKey method is not available on TransactionalEmailsApi instance');
-        }
-
-        const response = await apiInstance.sendTransacEmail(emailData);
+        // Use direct HTTP request to Brevo API to avoid SDK issues
+        const response = await sendBrevoEmailViaHTTP(emailData);
         console.log("✅ Email notification sent successfully!", {
             messageId: response.messageId,
             response: response
@@ -80,8 +68,61 @@ Status: ${bookingData.status || 'pending'}
             status: error.response?.statusCode || error.status,
             fullError: error
         });
-        throw error; // Re-throw to allow caller to handle if needed
+        throw error;
     }
+}
+
+// Helper function to send email via direct HTTP request
+function sendBrevoEmailViaHTTP(emailData) {
+    return new Promise((resolve, reject) => {
+        const postData = JSON.stringify(emailData);
+
+        const options = {
+            hostname: 'api.brevo.com',
+            port: 443,
+            path: '/v3/smtp/email',
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json',
+                'content-length': Buffer.byteLength(postData)
+            }
+        };
+
+        const req = https.request(options, (res) => {
+            let data = '';
+
+            res.on('data', (chunk) => {
+                data += chunk;
+            });
+
+            res.on('end', () => {
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                    try {
+                        const response = JSON.parse(data);
+                        resolve(response);
+                    } catch (e) {
+                        resolve({ messageId: data });
+                    }
+                } else {
+                    try {
+                        const errorData = JSON.parse(data);
+                        reject(new Error(`Brevo API error: ${errorData.message || data}`));
+                    } catch (e) {
+                        reject(new Error(`Brevo API error (${res.statusCode}): ${data}`));
+                    }
+                }
+            });
+        });
+
+        req.on('error', (error) => {
+            reject(error);
+        });
+
+        req.write(postData);
+        req.end();
+    });
 }
 
 module.exports = { sendEmailNotification };
