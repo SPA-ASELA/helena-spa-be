@@ -34,8 +34,8 @@ async function sendEmailNotification(booking) {
             })
             : bookingData.date || 'Not specified';
 
-        // Create email data
-        const emailData = {
+        // Build admin notification email
+        const adminEmailData = {
             sender: {
                 name: "Helena Spa",
                 email: "aselak30@gmail.com"
@@ -54,13 +54,52 @@ Status: ${bookingData.status || 'pending'}
             `.trim()
         };
 
-        // Use direct HTTP request to Brevo API to avoid SDK issues
-        const response = await sendBrevoEmailViaHTTP(emailData);
-        console.log("✅ Email notification sent successfully!", {
-            messageId: response.messageId,
-            response: response
-        });
-        return response;
+        // Build client confirmation email
+        const clientEmailData = bookingData.email
+            ? {
+                  sender: {
+                      name: "Helena Spa",
+                      email: "aselak30@gmail.com",
+                  },
+                  to: [{ email: bookingData.email }],
+                  subject: "Helena Spa Booking Received",
+                  textContent: `
+Hi ${bookingData.name || "there"},
+
+Thank you for booking an appointment at Helena Spa!
+
+Here are your booking details:
+- Service: ${bookingData.service || "Not provided"}
+- Date: ${formattedDate}
+- Time: ${bookingData.time || "Not provided"}
+- Phone: ${bookingData.phone || "Not provided"}
+
+Our team will review your request and contact you shortly. If you need to reach us sooner, feel free to WhatsApp us at +94776699488.
+
+Warm regards,
+Helena Spa Team
+                  `.trim(),
+              }
+            : null;
+
+        // Send emails (admin + client if available)
+        const responses = [];
+        const adminResponse = await sendBrevoEmailViaHTTP(adminEmailData);
+        responses.push({ type: "admin", response: adminResponse });
+
+        if (clientEmailData) {
+            try {
+                const clientResponse = await sendBrevoEmailViaHTTP(clientEmailData);
+                responses.push({ type: "client", response: clientResponse });
+            } catch (clientError) {
+                console.error("⚠️ Failed to send client confirmation email:", clientError.message);
+            }
+        } else {
+            console.warn("⚠️ Client email address missing; skipping customer confirmation email.");
+        }
+
+        console.log("✅ Email notifications sent successfully!", responses);
+        return responses;
     } catch (error) {
         console.error("❌ Brevo email error:", {
             message: error.message,
