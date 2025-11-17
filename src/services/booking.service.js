@@ -11,10 +11,13 @@ const { sendEmailNotification } = require('../utils/emailNotification');
 const createBooking = async (data) => {
     const booking = await Booking.create(data);
 
-    // Send email notification via Brevo (non-blocking)
-    sendEmailNotification(booking).catch((error) => {
+    // Send email notification via Brevo
+    try {
+        await sendEmailNotification(booking);
+        console.log('📧 Email notification sent immediately after booking creation.');
+    } catch (error) {
         console.error('Failed to send email notification:', error);
-    });
+    }
 
     return booking;
 };
