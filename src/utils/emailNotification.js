@@ -68,7 +68,7 @@ Status: ${bookingData.status || 'pending'}
                     email: "aselak30@gmail.com",
                 },
                 to: [{ email: bookingData.email }],
-                subject: "Helena Spa Booking Received",
+                subject: "✅ Helena Spa Booking Received",
                 textContent: `
 Hi ${bookingData.name || "there"},
 
