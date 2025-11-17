@@ -1,5 +1,4 @@
 const https = require('https');
-const dns = require('dns');
 
 async function sendEmailNotification(booking) {
     // Validate environment variables
@@ -100,9 +99,6 @@ function sendBrevoEmailViaHTTP(emailData, attempt = 1) {
                 'content-type': 'application/json',
                 'content-length': Buffer.byteLength(postData),
                 'user-agent': 'helena-spa-be/1.0',
-            },
-            lookup: (hostname, opts, cb) => {
-                dns.lookup(hostname, { family: 4, hints: dns.ADDRCONFIG }, cb);
             },
         };
 
