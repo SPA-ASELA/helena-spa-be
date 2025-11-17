@@ -7,8 +7,14 @@ async function sendEmailNotification(booking) {
         return;
     }
 
-    if (!process.env.ADMIN_EMAIL) {
-        console.error("❌ ADMIN_EMAIL is not set in environment variables");
+    const adminEmailsRaw = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || '';
+    const adminRecipients = adminEmailsRaw
+        .split(',')
+        .map((email) => email.trim())
+        .filter(Boolean);
+
+    if (adminRecipients.length === 0) {
+        console.error("❌ ADMIN_EMAIL/ADMIN_EMAILS is not set in environment variables");
         return;
     }
 
@@ -40,7 +46,7 @@ async function sendEmailNotification(booking) {
                 name: "Helena Spa",
                 email: "aselak30@gmail.com"
             },
-            to: [{ email: process.env.ADMIN_EMAIL }],
+            to: adminRecipients.map((email) => ({ email })),
             subject: "✅ New Booking Received",
             textContent: `
 New Booking Details:
