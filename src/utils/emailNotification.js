@@ -1,4 +1,5 @@
 const https = require('https');
+const dns = require('dns');
 
 async function sendEmailNotification(booking) {
     // Validate environment variables
@@ -72,22 +73,37 @@ Status: ${bookingData.status || 'pending'}
     }
 }
 
-// Helper function to send email via direct HTTP request
-function sendBrevoEmailViaHTTP(emailData) {
+// Helper function to send email via direct HTTP request with retries and IPv4 lookup
+function sendBrevoEmailViaHTTP(emailData, attempt = 1) {
+    const MAX_ATTEMPTS = 3;
+    const RETRYABLE_ERRORS = ['ECONNRESET', 'ETIMEDOUT', 'EPIPE'];
+
     return new Promise((resolve, reject) => {
         const postData = JSON.stringify(emailData);
+
+        const agent = new https.Agent({
+            keepAlive: true,
+            maxSockets: 5,
+            timeout: 15000,
+        });
 
         const options = {
             hostname: 'api.brevo.com',
             port: 443,
             path: '/v3/smtp/email',
             method: 'POST',
+            agent,
+            servername: 'api.brevo.com',
             headers: {
-                'accept': 'application/json',
+                accept: 'application/json',
                 'api-key': process.env.BREVO_API_KEY,
                 'content-type': 'application/json',
-                'content-length': Buffer.byteLength(postData)
-            }
+                'content-length': Buffer.byteLength(postData),
+                'user-agent': 'helena-spa-be/1.0',
+            },
+            lookup: (hostname, opts, cb) => {
+                dns.lookup(hostname, { family: 4, hints: dns.ADDRCONFIG }, cb);
+            },
         };
 
         const req = https.request(options, (res) => {
@@ -117,6 +133,15 @@ function sendBrevoEmailViaHTTP(emailData) {
         });
 
         req.on('error', (error) => {
+            if (RETRYABLE_ERRORS.includes(error.code) && attempt < MAX_ATTEMPTS) {
+                console.warn(`⚠️ Brevo request failed (attempt ${attempt}/${MAX_ATTEMPTS}). Retrying...`, error.message);
+                setTimeout(() => {
+                    sendBrevoEmailViaHTTP(emailData, attempt + 1)
+                        .then(resolve)
+                        .catch(reject);
+                }, attempt * 500);
+                return;
+            }
             reject(error);
         });
 
