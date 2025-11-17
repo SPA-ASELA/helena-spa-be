@@ -57,13 +57,13 @@ Status: ${bookingData.status || 'pending'}
         // Build client confirmation email
         const clientEmailData = bookingData.email
             ? {
-                  sender: {
-                      name: "Helena Spa",
-                      email: "aselak30@gmail.com",
-                  },
-                  to: [{ email: bookingData.email }],
-                  subject: "Helena Spa Booking Received",
-                  textContent: `
+                sender: {
+                    name: "Helena Spa",
+                    email: "aselak30@gmail.com",
+                },
+                to: [{ email: bookingData.email }],
+                subject: "Helena Spa Booking Received",
+                textContent: `
 Hi ${bookingData.name || "there"},
 
 Thank you for booking an appointment at Helena Spa!
@@ -79,7 +79,7 @@ Our team will review your request and contact you shortly. If you need to reach 
 Warm regards,
 Helena Spa Team
                   `.trim(),
-              }
+            }
             : null;
 
         // Send emails (admin + client if available)
