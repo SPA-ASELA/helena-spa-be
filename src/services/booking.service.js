@@ -2,6 +2,7 @@ const { Booking } = require('../models');
 const ApiError = require('../utils/ApiError');
 const httpStatus = require('http-status');
 const { sendEmailNotification } = require('../utils/emailNotification');
+const { sendSmsNotification } = require('../utils/smsNotification');
 
 /**
  * Create a booking
@@ -11,12 +12,19 @@ const { sendEmailNotification } = require('../utils/emailNotification');
 const createBooking = async (data) => {
     const booking = await Booking.create(data);
 
-    // Send email notification via Brevo
+    // Send notifications
     try {
         await sendEmailNotification(booking);
         console.log('📧 Email notification sent immediately after booking creation.');
     } catch (error) {
         console.error('Failed to send email notification:', error);
+    }
+
+    try {
+        await sendSmsNotification(booking);
+        console.log('📱 SMS notification sent immediately after booking creation.');
+    } catch (error) {
+        console.error('Failed to send SMS notification:', error);
     }
 
     return booking;
