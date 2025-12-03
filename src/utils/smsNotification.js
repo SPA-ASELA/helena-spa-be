@@ -27,12 +27,12 @@ async function sendSmsNotification(booking) {
 
     const formattedDate = bookingData.date
         ? new Date(bookingData.date).toLocaleString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-          })
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        })
         : 'Not provided';
 
     const message = [
